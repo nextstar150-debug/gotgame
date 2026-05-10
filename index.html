@@ -89,11 +89,11 @@
   }
 
   .hero {
-    width: min(100%, 1040px);
+    width: min(100%, 1100px);
     margin: 0 auto;
     padding: 28px 20px 24px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 430px;
+    grid-template-columns: minmax(0, 1fr) 470px;
     gap: 42px;
     align-items: center;
   }
@@ -177,7 +177,7 @@
   }
 
   .game-shell {
-    width: min(100%, 390px);
+    width: min(100%, 440px);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -274,7 +274,7 @@
   }
 
   .board {
-    width: min(100%, 340px);
+    width: min(100%, 390px);
     height: auto;
     background: var(--surface);
     border-radius: 28px;
@@ -555,7 +555,7 @@
           <div class="stat" id="moveCounter">진행 0/3</div>
         </div>
 
-        <svg class="board" id="board" viewBox="0 0 420 460" width="380" height="420" aria-label="같은 색 점 잇기 게임판">
+        <svg class="board" id="board" viewBox="0 0 420 460" width="410" height="450" aria-label="같은 색 점 잇기 게임판">
           <circle id="boundary" cx="210" cy="220" r="150" fill="none" stroke="#1d1d1f" stroke-width="7"/>
           <g id="paths"></g>
           <path id="cur" fill="none" stroke="#888" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -709,14 +709,14 @@ const levels = [
     name: '2번 병렬 4색 퍼즐',
     hint: '가까운 직선 대신 큰 호를 나눠 쓰세요',
     dots: [
-      { id: 'B1', x: 55,  y: 220, tag: 'B' },
-      { id: 'Y1', x: 99,  y: 220, tag: 'Y' },
-      { id: 'R1', x: 143, y: 220, tag: 'R' },
-      { id: 'K1', x: 187, y: 220, tag: 'K' },
-      { id: 'B2', x: 233, y: 220, tag: 'B' },
-      { id: 'Y2', x: 277, y: 220, tag: 'Y' },
-      { id: 'R2', x: 321, y: 220, tag: 'R' },
-      { id: 'K2', x: 365, y: 220, tag: 'K' }
+      { id: 'B1', x: 48,  y: 220, tag: 'B' },
+      { id: 'Y1', x: 84,  y: 220, tag: 'Y' },
+      { id: 'R1', x: 120, y: 220, tag: 'R' },
+      { id: 'K1', x: 156, y: 220, tag: 'K' },
+      { id: 'B2', x: 264, y: 220, tag: 'B' },
+      { id: 'Y2', x: 300, y: 220, tag: 'Y' },
+      { id: 'R2', x: 336, y: 220, tag: 'R' },
+      { id: 'K2', x: 372, y: 220, tag: 'K' }
     ],
     solution: [
       { tag: 'K', dotIds: ['K1', 'K2'] },
@@ -735,7 +735,7 @@ const levels = [
       { id: 'G1', x: 94,  y: 292, tag: 'G' },
       { id: 'Y2', x: 178, y: 294, tag: 'Y' },
       { id: 'B2', x: 286, y: 292, tag: 'B' },
-      { id: 'G2', x: 346, y: 220, tag: 'G' },
+      { id: 'G2', x: 370, y: 220, tag: 'G' },
       { id: 'P2', x: 276, y: 374, tag: 'P' }
     ],
     solution: [
