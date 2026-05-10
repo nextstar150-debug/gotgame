@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>같은 색 잇기 - 레벨 프로토타입</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5327283680474427" crossorigin="anonymous"></script>
+<style>
+  :root {
+    --blue: #0066cc;
+    --blue-strong: #0071e3;
+    --ink: #1d1d1f;
+    --muted: #6e6e73;
+    --canvas: #f5f5f7;
+    --surface: #ffffff;
+    --hairline: #d2d2d7;
+    --success: #248a3d;
+    --error: #d70015;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo", sans-serif;
+    padding: 18px;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .game-shell {
+    width: min(100%, 430px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .topbar {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--ink);
+    font-size: 24px;
+    font-weight: 650;
+    line-height: 1.12;
+    text-align: center;
+    letter-spacing: 0;
+  }
+
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--blue);
+    padding: 0;
+  }
+
+  .icon-btn:disabled {
+    color: #b8b8bd;
+    cursor: default;
+  }
+
+  .level-label {
+    margin: 0 0 8px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .progress {
+    min-height: 22px;
+    display: flex;
+    gap: 7px;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .pill {
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    border: 2px solid var(--hairline);
+    background: var(--surface);
+    transition: transform 0.18s, border-color 0.18s, background 0.18s;
+  }
+
+  .pill.done {
+    border-color: var(--ink);
+    transform: scale(1.05);
+  }
+
+  .status {
+    min-height: 24px;
+    margin: 0 0 14px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    transition: color 0.2s;
+  }
+
+  .status.err { color: var(--error); font-weight: 650; }
+  .status.win { color: var(--success); font-weight: 700; }
+
+  .stats {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .stat {
+    min-width: 82px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 550;
+    text-align: center;
+  }
+
+  svg {
+    width: min(100%, 380px);
+    height: auto;
+    background: var(--surface);
+    border-radius: 28px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.08);
+    touch-action: none;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 18px;
+  }
+
+  button {
+    min-height: 44px;
+    padding: 11px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    color: var(--blue);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, transform 0.15s;
+  }
+
+  button:hover:not(:disabled) {
+    background: #fbfbfd;
+  }
+
+  button:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  button.primary {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+
+  button.primary:hover {
+    background: var(--blue-strong);
+  }
+
+  button:disabled {
+    color: #86868b;
+    background: #f5f5f7;
+    cursor: default;
+    transform: none;
+  }
+
+  .tooltip-wrap {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .tooltip-wrap::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translateX(-50%) translateY(4px);
+    width: max-content;
+    max-width: 230px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(29, 29, 31, 0.92);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+    z-index: 10;
+  }
+
+  .tooltip-wrap:hover::after,
+  .tooltip-wrap:focus-within::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .ad-slot {
+    width: min(100%, 380px);
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 18px;
+    overflow: hidden;
+  }
+
+  @media (max-width: 420px) {
+    body { padding: 14px; }
+    h2 { font-size: 21px; }
+    svg { border-radius: 24px; }
+    .controls { width: 100%; }
+    .controls button { flex: 1; padding-inline: 10px; }
+    .tooltip-wrap { flex: 1; }
+    .tooltip-wrap button { width: 100%; }
+  }
+</style>
+</head>
+<body>
+  <main class="game-shell">
+    <div class="topbar">
+      <button class="icon-btn" id="prevBtn" type="button" onclick="prevLevel()" aria-label="이전 레벨">
+        <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <h2>같은 색 점 잇기</h2>
+      <button class="icon-btn" id="nextBtn" type="button" onclick="nextLevel()" aria-label="다음 레벨">
+        <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    <p class="level-label" id="levelLabel"></p>
+    <div class="progress" id="progress"></div>
+    <div class="status" id="status">점을 누른 채 같은 색 점까지 끌어주세요</div>
+    <div class="stats">
+      <div class="stat" id="playCounter">누적 플레이 12,847</div>
+      <div class="stat" id="moveCounter">진행 0/3</div>
+    </div>
+
+    <svg id="board" viewBox="0 0 420 460" width="380" height="420" aria-label="같은 색 점 잇기 게임판">
+      <circle id="boundary" cx="210" cy="220" r="150" fill="none" stroke="#1d1d1f" stroke-width="7"/>
+      <g id="paths"></g>
+      <path id="cur" fill="none" stroke="#888" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <g id="dots"></g>
+    </svg>
+
+    <div class="controls">
+      <button type="button" onclick="reset()">다시 시작</button>
+      <span class="tooltip-wrap" data-tip="추후 회원 서비스로 제공합니다.">
+        <button class="primary" type="button" disabled aria-describedby="solutionTip">정답 보기</button>
+      </span>
+    </div>
+    <div class="ad-slot" aria-label="광고">
+      <ins class="adsbygoogle"
+        style="display:block;width:100%;min-height:90px"
+        data-ad-client="ca-pub-5327283680474427"
+        data-ad-format="auto"
+        data-full-width-responsive="true"></ins>
+    </div>
+  </main>
+
+<script>
+const BOARD = { cx: 210, cy: 220, r: 150 };
+const COLORS = {
+  B: '#0066cc',
+  R: '#ff3b30',
+  G: '#34c759',
+  Y: '#ffcc00',
+  P: '#af52de'
+};
+
+const levels = [
+  {
+    name: 'Level 1',
+    hint: 'S자 길을 찾아보세요',
+    dots: [
+      { id: 'B1', x: 210, y: 70,  tag: 'B' },
+      { id: 'Gr', x: 360, y: 220, tag: 'G' },
+      { id: 'R1', x: 210, y: 370, tag: 'R' },
+      { id: 'Gl', x: 60,  y: 220, tag: 'G' },
+      { id: 'R2', x: 240, y: 190, tag: 'R' },
+      { id: 'B2', x: 180, y: 250, tag: 'B' }
+    ],
+    solutionNote: '정답: 초록을 S자로 비틀어 공간을 나눕니다',
+    solution: [
+      {
+        tag: 'G',
+        points: [
+          {x:60,y:220},{x:90,y:240},{x:130,y:265},{x:170,y:278},{x:200,y:275},
+          {x:215,y:260},{x:225,y:230},{x:230,y:200},{x:235,y:175},{x:255,y:165},
+          {x:290,y:170},{x:325,y:185},{x:360,y:220}
+        ],
+        dotIds: ['Gl','Gr']
+      },
+      {
+        tag: 'B',
+        points: [{x:210,y:70},{x:170,y:130},{x:155,y:180},{x:165,y:225},{x:180,y:250}],
+        dotIds: ['B1','B2']
+      },
+      {
+        tag: 'R',
+        points: [{x:210,y:370},{x:255,y:310},{x:265,y:260},{x:255,y:215},{x:240,y:190}],
+        dotIds: ['R1','R2']
+      }
+    ]
+  },
+  {
+    name: 'Level 2',
+    hint: '위아래 통로를 따로 확보하세요',
+    dots: [
+      { id: 'B1', x: 115, y: 128, tag: 'B' },
+      { id: 'B2', x: 115, y: 312, tag: 'B' },
+      { id: 'R1', x: 305, y: 128, tag: 'R' },
+      { id: 'R2', x: 305, y: 312, tag: 'R' },
+      { id: 'G1', x: 168, y: 176, tag: 'G' },
+      { id: 'G2', x: 252, y: 176, tag: 'G' },
+      { id: 'Y1', x: 168, y: 264, tag: 'Y' },
+      { id: 'Y2', x: 252, y: 264, tag: 'Y' }
+    ],
+    solutionNote: '정답: 양쪽 세로길을 먼저 만들고 가운데를 짧게 잠급니다',
+    solution: [
+      {
+        tag: 'B',
+        points: [{x:115,y:128},{x:90,y:170},{x:86,y:220},{x:92,y:270},{x:115,y:312}],
+        dotIds: ['B1','B2']
+      },
+      {
+        tag: 'R',
+        points: [{x:305,y:128},{x:330,y:170},{x:334,y:220},{x:328,y:270},{x:305,y:312}],
+        dotIds: ['R1','R2']
+      },
+      {
+        tag: 'G',
+        points: [{x:168,y:176},{x:195,y:160},{x:225,y:160},{x:252,y:176}],
+        dotIds: ['G1','G2']
+      },
+      {
+        tag: 'Y',
+        points: [{x:168,y:264},{x:195,y:280},{x:225,y:280},{x:252,y:264}],
+        dotIds: ['Y1','Y2']
+      }
+    ]
+  },
+  {
+    name: 'Level 3',
+    hint: '다섯 줄을 서로 다른 높이에 배치하세요',
+    dots: [
+      { id: 'B1', x: 95,  y: 152, tag: 'B' },
+      { id: 'B2', x: 325, y: 152, tag: 'B' },
+      { id: 'R1', x: 78,  y: 220, tag: 'R' },
+      { id: 'R2', x: 342, y: 220, tag: 'R' },
+      { id: 'G1', x: 95,  y: 288, tag: 'G' },
+      { id: 'G2', x: 325, y: 288, tag: 'G' },
+      { id: 'Y1', x: 162, y: 198, tag: 'Y' },
+      { id: 'Y2', x: 258, y: 198, tag: 'Y' },
+      { id: 'P1', x: 162, y: 242, tag: 'P' },
+      { id: 'P2', x: 258, y: 242, tag: 'P' }
+    ],
+    solutionNote: '정답: 바깥 큰 줄과 안쪽 짧은 줄의 높이를 분리합니다',
+    solution: [
+      {
+        tag: 'B',
+        points: [{x:95,y:152},{x:135,y:122},{x:185,y:112},{x:235,y:112},{x:285,y:122},{x:325,y:152}],
+        dotIds: ['B1','B2']
+      },
+      {
+        tag: 'R',
+        points: [{x:78,y:220},{x:120,y:220},{x:168,y:220},{x:252,y:220},{x:300,y:220},{x:342,y:220}],
+        dotIds: ['R1','R2']
+      },
+      {
+        tag: 'G',
+        points: [{x:95,y:288},{x:135,y:318},{x:185,y:328},{x:235,y:328},{x:285,y:318},{x:325,y:288}],
+        dotIds: ['G1','G2']
+      },
+      {
+        tag: 'Y',
+        points: [{x:162,y:198},{x:190,y:184},{x:230,y:184},{x:258,y:198}],
+        dotIds: ['Y1','Y2']
+      },
+      {
+        tag: 'P',
+        points: [{x:162,y:242},{x:190,y:256},{x:230,y:256},{x:258,y:242}],
+        dotIds: ['P1','P2']
+      }
+    ]
+  }
+];
+
+let currentLevel = 0;
+let paths = [];
+let active = null;
+let playCount = Number(localStorage.getItem('dotgame.playCount') || '12847');
+let countedThisRound = false;
+
+const svg = document.getElementById('board');
+const dotsG = document.getElementById('dots');
+const pathsG = document.getElementById('paths');
+const curEl = document.getElementById('cur');
+const statusEl = document.getElementById('status');
+const progressEl = document.getElementById('progress');
+const playCounterEl = document.getElementById('playCounter');
+const moveCounterEl = document.getElementById('moveCounter');
+const levelLabelEl = document.getElementById('levelLabel');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+function level() {
+  return levels[currentLevel];
+}
+
+function dots() {
+  return level().dots.map(d => ({ ...d, color: colorOf(d.tag) }));
+}
+
+function pairCount() {
+  return level().solution.length;
+}
+
+function setStatus(msg, cls = '') {
+  statusEl.textContent = msg;
+  statusEl.className = 'status ' + cls;
+}
+
+function render() {
+  const currentDots = dots();
+
+  levelLabelEl.textContent = `${level().name} / ${levels.length} · ${level().hint}`;
+  prevBtn.disabled = currentLevel === 0;
+  nextBtn.disabled = currentLevel === levels.length - 1;
+
+  dotsG.innerHTML = '';
+  for (const d of currentDots) {
+    const used = paths.some(p => p.dotIds.includes(d.id));
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('cx', d.x);
+    c.setAttribute('cy', d.y);
+    c.setAttribute('r', 18);
+    c.setAttribute('fill', d.color);
+    c.setAttribute('stroke', '#1d1d1f');
+    c.setAttribute('stroke-width', used ? 4.5 : 4);
+    c.setAttribute('opacity', used ? 0.9 : 1);
+    dotsG.appendChild(c);
+  }
+
+  pathsG.innerHTML = '';
+  for (const p of paths) {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', toSvgPath(p.points));
+    path.setAttribute('stroke', p.color);
+    path.setAttribute('stroke-width', 5.5);
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('fill', 'none');
+    pathsG.appendChild(path);
+  }
+
+  progressEl.innerHTML = '';
+  for (const tag of level().solution.map(s => s.tag)) {
+    const pill = document.createElement('div');
+    const done = paths.some(p => p.tag === tag);
+    pill.className = 'pill' + (done ? ' done' : '');
+    pill.style.background = done ? colorOf(tag) : '#fff';
+    progressEl.appendChild(pill);
+  }
+
+  playCounterEl.textContent = `누적 플레이 ${playCount.toLocaleString('ko-KR')}`;
+  moveCounterEl.textContent = `진행 ${paths.length}/${pairCount()}`;
+}
+
+function colorOf(tag) {
+  return COLORS[tag] || '#1d1d1f';
+}
+
+function toSvgPath(pts) {
+  if (!pts || pts.length === 0) return '';
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length; i++) d += ` L ${pts[i].x} ${pts[i].y}`;
+  return d;
+}
+
+function getSvgPoint(evt) {
+  const pt = svg.createSVGPoint();
+  pt.x = evt.clientX;
+  pt.y = evt.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+function isInsideBoard(p) {
+  const dx = p.x - BOARD.cx;
+  const dy = p.y - BOARD.cy;
+  return dx * dx + dy * dy <= BOARD.r * BOARD.r;
+}
+
+function findDotAt(x, y) {
+  for (const d of dots()) {
+    const dx = d.x - x;
+    const dy = d.y - y;
+    if (dx * dx + dy * dy < 30 * 30) return d;
+  }
+  return null;
+}
+
+function segIntersect(a, b, c, d) {
+  const det = (b.x - a.x) * (d.y - c.y) - (b.y - a.y) * (d.x - c.x);
+  if (Math.abs(det) < 1e-9) return false;
+  const t = ((c.x - a.x) * (d.y - c.y) - (c.y - a.y) * (d.x - c.x)) / det;
+  const u = ((c.x - a.x) * (b.y - a.y) - (c.y - a.y) * (b.x - a.x)) / det;
+  return t > 0.001 && t < 0.999 && u > 0.001 && u < 0.999;
+}
+
+function segCrossesAny(seg) {
+  for (const p of paths) {
+    for (let i = 0; i < p.points.length - 1; i++) {
+      if (segIntersect(seg.a, seg.b, p.points[i], p.points[i + 1])) return true;
+    }
+  }
+  if (active) {
+    const pts = active.points;
+    for (let i = 0; i < pts.length - 2; i++) {
+      if (segIntersect(seg.a, seg.b, pts[i], pts[i + 1])) return true;
+    }
+  }
+  return false;
+}
+
+function startDraw(dot) {
+  if (paths.some(p => p.dotIds.includes(dot.id))) return false;
+  countPlayOnce();
+  active = {
+    color: dot.color,
+    tag: dot.tag,
+    startDot: dot,
+    points: [{ x: dot.x, y: dot.y }]
+  };
+  curEl.setAttribute('stroke', dot.color);
+  setStatus('끌어서 같은 색 점까지 잇기...');
+  return true;
+}
+
+function continueDraw(p) {
+  if (!active) return;
+  if (!isInsideBoard(p)) {
+    setStatus('원 안에서만 선을 이어야 합니다', 'err');
+    cancelDraw();
+    return;
+  }
+
+  const last = active.points[active.points.length - 1];
+  const dx = p.x - last.x;
+  const dy = p.y - last.y;
+  if (dx * dx + dy * dy < 9) return;
+
+  if (segCrossesAny({ a: last, b: p })) {
+    setStatus('선이 교차했습니다', 'err');
+    cancelDraw();
+    return;
+  }
+
+  active.points.push({ x: p.x, y: p.y });
+  curEl.setAttribute('d', toSvgPath(active.points));
+}
+
+function endDraw(p) {
+  if (!active) return;
+  const dot = findDotAt(p.x, p.y);
+  if (dot && dot.id !== active.startDot.id && dot.tag === active.tag &&
+      !paths.some(pp => pp.dotIds.includes(dot.id))) {
+    const last = active.points[active.points.length - 1];
+    if (segCrossesAny({ a: last, b: { x: dot.x, y: dot.y } })) {
+      setStatus('마지막 선이 교차합니다', 'err');
+      cancelDraw();
+      return;
+    }
+
+    active.points.push({ x: dot.x, y: dot.y });
+    paths.push({
+      color: active.color,
+      tag: active.tag,
+      points: active.points.slice(),
+      dotIds: [active.startDot.id, dot.id]
+    });
+    active = null;
+    curEl.setAttribute('d', '');
+    render();
+
+    if (paths.length === pairCount()) {
+      setStatus('완성! 모든 색을 이었습니다', 'win');
+    } else {
+      setStatus(`좋아요. ${paths.length}/${pairCount()} 연결`);
+    }
+    return;
+  }
+  cancelDraw();
+}
+
+function cancelDraw() {
+  active = null;
+  curEl.setAttribute('d', '');
+  setTimeout(() => {
+    if (!active && paths.length < pairCount()) {
+      setStatus(`${paths.length}/${pairCount()} 연결. 계속하세요`);
+    }
+  }, 800);
+}
+
+function reset() {
+  paths = [];
+  active = null;
+  countedThisRound = false;
+  curEl.setAttribute('d', '');
+  setStatus('점을 누른 채 같은 색 점까지 끌어주세요');
+  render();
+}
+
+function countPlayOnce() {
+  if (countedThisRound) return;
+  countedThisRound = true;
+  playCount += 1;
+  localStorage.setItem('dotgame.playCount', String(playCount));
+  render();
+}
+
+function showSolution() {
+  paths = level().solution.map(s => ({
+    color: colorOf(s.tag),
+    tag: s.tag,
+    points: s.points.map(p => ({ ...p })),
+    dotIds: s.dotIds.slice()
+  }));
+  active = null;
+  curEl.setAttribute('d', '');
+  render();
+  setStatus(level().solutionNote, 'win');
+}
+
+function prevLevel() {
+  if (currentLevel === 0) return;
+  currentLevel -= 1;
+  countedThisRound = false;
+  reset();
+}
+
+function nextLevel() {
+  if (currentLevel === levels.length - 1) return;
+  currentLevel += 1;
+  countedThisRound = false;
+  reset();
+}
+
+svg.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  const p = getSvgPoint(e);
+  const dot = findDotAt(p.x, p.y);
+  if (dot) {
+    if (startDraw(dot)) svg.setPointerCapture(e.pointerId);
+  }
+});
+
+svg.addEventListener('pointermove', (e) => {
+  if (!active) return;
+  e.preventDefault();
+  continueDraw(getSvgPoint(e));
+});
+
+svg.addEventListener('pointerup', (e) => {
+  if (!active) return;
+  e.preventDefault();
+  endDraw(getSvgPoint(e));
+});
+
+svg.addEventListener('pointercancel', cancelDraw);
+
+render();
+try {
+  (adsbygoogle = window.adsbygoogle || []).push({});
+} catch (err) {
+  console.warn('AdSense slot was not loaded.', err);
+}
+</script>
+</body>
+</html>
