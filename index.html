@@ -208,6 +208,25 @@
     margin-bottom: 8px;
   }
 
+  .level-tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 2px 0 12px;
+  }
+
+  .level-tabs button {
+    min-height: 34px;
+    padding: 7px 13px;
+    font-size: 13px;
+  }
+
+  .level-tabs button.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+
   .pill {
     width: 17px;
     height: 17px;
@@ -524,6 +543,10 @@
       <div class="game-shell" aria-label="Circle Dot Link 플레이 영역">
         <h2 class="game-title">같은 색 점 잇기</h2>
         <p class="level-label" id="levelLabel">대표 퍼즐 · S자 길을 찾아보세요</p>
+        <div class="level-tabs" aria-label="레벨 선택">
+          <button type="button" id="level1Btn" class="active" onclick="selectLevel(0)">1번</button>
+          <button type="button" id="level2Btn" onclick="selectLevel(1)">2번</button>
+        </div>
         <div class="progress" id="progress"></div>
         <div class="status" id="status">점을 누른 채 같은 색 점까지 끌어주세요</div>
         <div class="stats">
@@ -570,7 +593,7 @@
           <li>색 점 하나를 누른 채 드래그합니다.</li>
           <li>같은 색 점까지 선을 이어갑니다.</li>
           <li>선이 원 밖으로 나가거나 다른 선과 교차하면 실패합니다.</li>
-          <li>세 색을 모두 연결하면 성공입니다.</li>
+          <li>모든 색을 연결하면 성공입니다.</li>
         </ol>
       </section>
 
@@ -587,7 +610,7 @@
 
       <section class="content-section" id="level-guide">
         <h2>현재 레벨 구성</h2>
-        <p>지금은 검증된 대표 퍼즐 1개만 제공합니다. 이전에 테스트했던 2번, 3번 퍼즐은 난이도가 충분하지 않아 제외했습니다. 추후에는 실제 플레이 실패율과 경로 검증을 거친 새 레벨을 추가할 예정입니다.</p>
+        <p>현재는 대표 S자 퍼즐과 광고형 4색 병렬 퍼즐을 제공합니다. 2번 퍼즐은 같은 순서로 놓인 양쪽 점을 바깥 호와 안쪽 곡선으로 나누어 연결해야 합니다.</p>
       </section>
 
       <section class="content-section" id="faq">
@@ -657,29 +680,55 @@ const BOARD = { cx: 210, cy: 220, r: 150 };
 const COLORS = {
   B: '#0066cc',
   R: '#ff3b30',
-  G: '#34c759'
+  G: '#34c759',
+  Y: '#ffd60a',
+  K: '#1d1d1f'
 };
 
-const level = {
-  name: 'Circle Dot Link',
-  hint: 'S자 길을 찾아보세요',
-  dots: [
-    { id: 'B1', x: 210, y: 70,  tag: 'B' },
-    { id: 'Gr', x: 360, y: 220, tag: 'G' },
-    { id: 'R1', x: 210, y: 370, tag: 'R' },
-    { id: 'Gl', x: 60,  y: 220, tag: 'G' },
-    { id: 'R2', x: 240, y: 190, tag: 'R' },
-    { id: 'B2', x: 180, y: 250, tag: 'B' }
-  ],
-  solution: [
-    { tag: 'G', dotIds: ['Gl', 'Gr'] },
-    { tag: 'B', dotIds: ['B1', 'B2'] },
-    { tag: 'R', dotIds: ['R1', 'R2'] }
-  ]
-};
+const levels = [
+  {
+    name: '1번 대표 퍼즐',
+    hint: 'S자 길을 찾아보세요',
+    dots: [
+      { id: 'B1', x: 210, y: 70,  tag: 'B' },
+      { id: 'Gr', x: 360, y: 220, tag: 'G' },
+      { id: 'R1', x: 210, y: 370, tag: 'R' },
+      { id: 'Gl', x: 60,  y: 220, tag: 'G' },
+      { id: 'R2', x: 240, y: 190, tag: 'R' },
+      { id: 'B2', x: 180, y: 250, tag: 'B' }
+    ],
+    solution: [
+      { tag: 'G', dotIds: ['Gl', 'Gr'] },
+      { tag: 'B', dotIds: ['B1', 'B2'] },
+      { tag: 'R', dotIds: ['R1', 'R2'] }
+    ]
+  },
+  {
+    name: '2번 병렬 4색 퍼즐',
+    hint: '가까운 직선 대신 큰 호를 나눠 쓰세요',
+    dots: [
+      { id: 'B1', x: 78,  y: 220, tag: 'B' },
+      { id: 'Y1', x: 118, y: 220, tag: 'Y' },
+      { id: 'R1', x: 158, y: 220, tag: 'R' },
+      { id: 'K1', x: 198, y: 220, tag: 'K' },
+      { id: 'B2', x: 232, y: 220, tag: 'B' },
+      { id: 'Y2', x: 272, y: 220, tag: 'Y' },
+      { id: 'R2', x: 312, y: 220, tag: 'R' },
+      { id: 'K2', x: 342, y: 220, tag: 'K' }
+    ],
+    solution: [
+      { tag: 'K', dotIds: ['K1', 'K2'] },
+      { tag: 'B', dotIds: ['B1', 'B2'] },
+      { tag: 'Y', dotIds: ['Y1', 'Y2'] },
+      { tag: 'R', dotIds: ['R1', 'R2'] }
+    ]
+  }
+];
 
 let paths = [];
 let active = null;
+let levelIndex = 0;
+let level = levels[levelIndex];
 let playCount = Number(localStorage.getItem('dotgame.playCount') || '12847');
 let countedThisRound = false;
 
@@ -692,6 +741,10 @@ const progressEl = document.getElementById('progress');
 const playCounterEl = document.getElementById('playCounter');
 const moveCounterEl = document.getElementById('moveCounter');
 const levelLabelEl = document.getElementById('levelLabel');
+const levelButtons = [
+  document.getElementById('level1Btn'),
+  document.getElementById('level2Btn')
+];
 
 function pairCount() {
   return level.solution.length;
@@ -709,6 +762,10 @@ function dots() {
 function render() {
   const currentDots = dots();
   levelLabelEl.textContent = `${level.name} · ${level.hint}`;
+  levelButtons.forEach((button, index) => {
+    button.classList.toggle('active', index === levelIndex);
+    button.setAttribute('aria-pressed', String(index === levelIndex));
+  });
 
   dotsG.innerHTML = '';
   for (const d of currentDots) {
@@ -718,7 +775,7 @@ function render() {
     c.setAttribute('cy', d.y);
     c.setAttribute('r', 18);
     c.setAttribute('fill', d.color);
-    c.setAttribute('stroke', '#1d1d1f');
+    c.setAttribute('stroke', d.tag === 'K' ? '#86868b' : '#1d1d1f');
     c.setAttribute('stroke-width', used ? 4.5 : 4);
     c.setAttribute('opacity', used ? 0.9 : 1);
     dotsG.appendChild(c);
@@ -790,6 +847,25 @@ function segIntersect(a, b, c, d) {
   return t > 0.001 && t < 0.999 && u > 0.001 && u < 0.999;
 }
 
+function pointToSegmentDistance(p, a, b) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const lenSq = dx * dx + dy * dy;
+  if (lenSq === 0) return Math.hypot(p.x - a.x, p.y - a.y);
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq));
+  const x = a.x + t * dx;
+  const y = a.y + t * dy;
+  return Math.hypot(p.x - x, p.y - y);
+}
+
+function segHitsBlockedDot(seg, allowedIds = []) {
+  const allowed = new Set(allowedIds);
+  return dots().some(dot => {
+    if (allowed.has(dot.id)) return false;
+    return pointToSegmentDistance(dot, seg.a, seg.b) < 17;
+  });
+}
+
 function segCrossesAny(seg) {
   for (const p of paths) {
     for (let i = 0; i < p.points.length - 1; i++) {
@@ -840,6 +916,15 @@ function continueDraw(p) {
   const dy = p.y - last.y;
   if (dx * dx + dy * dy < 9) return;
 
+  const passableDots = level.dots
+    .filter(dot => dot.id === active.startDot.id || dot.tag === active.tag)
+    .map(dot => dot.id);
+  if (segHitsBlockedDot({ a: last, b: p }, passableDots)) {
+    setStatus('다른 점을 지나갈 수 없습니다', 'err');
+    cancelDraw();
+    return;
+  }
+
   if (segCrossesAny({ a: last, b: p })) {
     setStatus('선이 교차했습니다', 'err');
     cancelDraw();
@@ -858,6 +943,12 @@ function endDraw(p) {
     const last = active.points[active.points.length - 1];
     if (segCrossesAny({ a: last, b: { x: dot.x, y: dot.y } })) {
       setStatus('마지막 선이 교차합니다', 'err');
+      cancelDraw();
+      return;
+    }
+
+    if (segHitsBlockedDot({ a: last, b: { x: dot.x, y: dot.y } }, [active.startDot.id, dot.id])) {
+      setStatus('다른 점을 지나갈 수 없습니다', 'err');
       cancelDraw();
       return;
     }
@@ -900,6 +991,13 @@ function reset() {
   curEl.setAttribute('d', '');
   setStatus('점을 누른 채 같은 색 점까지 끌어주세요');
   render();
+}
+
+function selectLevel(index) {
+  if (index === levelIndex || !levels[index]) return;
+  levelIndex = index;
+  level = levels[levelIndex];
+  reset();
 }
 
 svg.addEventListener('pointerdown', (e) => {
