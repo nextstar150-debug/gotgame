@@ -393,6 +393,9 @@
     justify-content: center;
     overflow: hidden;
     position: relative;
+    border: 1px dashed var(--hairline);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.58);
   }
 
   .ad-slot .adsbygoogle {
@@ -400,6 +403,23 @@
     width: 728px;
     max-width: 100%;
     min-height: 90px;
+  }
+
+  .ad-fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .adsbygoogle[data-ad-status="filled"] + .ad-fallback {
+    display: none;
   }
 
   .site-footer {
@@ -500,6 +520,7 @@
         <a href="#how-to-play">게임 방법</a>
         <a href="#tips">공략</a>
         <a href="#faq">FAQ</a>
+        <a href="mailto:ohorangeclub@gmail.com">광고문의</a>
         <a href="#privacy">정책</a>
       </div>
     </nav>
@@ -603,8 +624,10 @@
 
       <section class="content-section" id="contact">
         <h2>Contact</h2>
-        <p>버그 제보, 레벨 제안, 광고 및 제휴 문의는 아래 이메일로 보내주세요.</p>
+        <p>버그 제보, 레벨 제안, 서비스 문의는 아래 이메일로 보내주세요.</p>
         <p><a href="mailto:nextstar150@gmail.com">nextstar150@gmail.com</a></p>
+        <h3>광고 문의</h3>
+        <p>브랜드 캠페인, 배너 광고, 퍼즐 협업 문의는 <a href="mailto:ohorangeclub@gmail.com">ohorangeclub@gmail.com</a> 으로 보내주세요.</p>
       </section>
 
       <section class="content-section" id="privacy">
@@ -624,8 +647,10 @@
           <ins class="adsbygoogle"
             style="display:block"
             data-ad-client="ca-pub-5327283680474427"
+            data-ad-slot="3864050978"
             data-ad-format="horizontal"
             data-full-width-responsive="false"></ins>
+          <div class="ad-fallback">광고 영역입니다. AdSense가 광고를 채우면 이 안내 문구는 자동으로 사라집니다.</div>
         </div>
       </section>
     </section>
@@ -638,6 +663,7 @@
       <a href="#tips">Tips</a>
       <a href="#about">About</a>
       <a href="#contact">Contact</a>
+      <a href="mailto:ohorangeclub@gmail.com">광고문의</a>
       <a href="#privacy">Privacy</a>
       <a href="#terms">Terms</a>
     </div>
