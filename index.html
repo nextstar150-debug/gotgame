@@ -546,6 +546,7 @@
         <div class="level-tabs" aria-label="레벨 선택">
           <button type="button" id="level1Btn" class="active" onclick="selectLevel(0)">1번</button>
           <button type="button" id="level2Btn" onclick="selectLevel(1)">2번</button>
+          <button type="button" id="level3Btn" onclick="selectLevel(2)">3번</button>
         </div>
         <div class="progress" id="progress"></div>
         <div class="status" id="status">점을 누른 채 같은 색 점까지 끌어주세요</div>
@@ -610,7 +611,7 @@
 
       <section class="content-section" id="level-guide">
         <h2>현재 레벨 구성</h2>
-        <p>현재는 대표 S자 퍼즐과 광고형 4색 병렬 퍼즐을 제공합니다. 2번 퍼즐은 같은 순서로 놓인 양쪽 점을 바깥 호와 안쪽 곡선으로 나누어 연결해야 합니다.</p>
+        <p>현재는 대표 S자 퍼즐, 광고형 4색 병렬 퍼즐, 세로 배치 컬러 퍼즐을 제공합니다. 2번 퍼즐은 같은 순서로 놓인 양쪽 점을 바깥 호와 안쪽 곡선으로 나누어 연결해야 합니다.</p>
       </section>
 
       <section class="content-section" id="faq">
@@ -676,12 +677,13 @@
   </footer>
 
 <script>
-const BOARD = { cx: 210, cy: 220, r: 150 };
+const BOARD = { cx: 210, cy: 220, r: 178 };
 const COLORS = {
   B: '#0066cc',
   R: '#ff3b30',
   G: '#34c759',
   Y: '#ffd60a',
+  P: '#ff2d75',
   K: '#1d1d1f'
 };
 
@@ -707,20 +709,40 @@ const levels = [
     name: '2번 병렬 4색 퍼즐',
     hint: '가까운 직선 대신 큰 호를 나눠 쓰세요',
     dots: [
-      { id: 'B1', x: 78,  y: 220, tag: 'B' },
-      { id: 'Y1', x: 118, y: 220, tag: 'Y' },
-      { id: 'R1', x: 158, y: 220, tag: 'R' },
-      { id: 'K1', x: 198, y: 220, tag: 'K' },
-      { id: 'B2', x: 232, y: 220, tag: 'B' },
-      { id: 'Y2', x: 272, y: 220, tag: 'Y' },
-      { id: 'R2', x: 312, y: 220, tag: 'R' },
-      { id: 'K2', x: 342, y: 220, tag: 'K' }
+      { id: 'B1', x: 55,  y: 220, tag: 'B' },
+      { id: 'Y1', x: 99,  y: 220, tag: 'Y' },
+      { id: 'R1', x: 143, y: 220, tag: 'R' },
+      { id: 'K1', x: 187, y: 220, tag: 'K' },
+      { id: 'B2', x: 233, y: 220, tag: 'B' },
+      { id: 'Y2', x: 277, y: 220, tag: 'Y' },
+      { id: 'R2', x: 321, y: 220, tag: 'R' },
+      { id: 'K2', x: 365, y: 220, tag: 'K' }
     ],
     solution: [
       { tag: 'K', dotIds: ['K1', 'K2'] },
       { tag: 'B', dotIds: ['B1', 'B2'] },
       { tag: 'Y', dotIds: ['Y1', 'Y2'] },
       { tag: 'R', dotIds: ['R1', 'R2'] }
+    ]
+  },
+  {
+    name: '3번 컬러 보드 퍼즐',
+    hint: '세로 길과 바깥 호를 먼저 나누세요',
+    dots: [
+      { id: 'Y1', x: 150, y: 64,  tag: 'Y' },
+      { id: 'P1', x: 270, y: 64,  tag: 'P' },
+      { id: 'B1', x: 52,  y: 188, tag: 'B' },
+      { id: 'G1', x: 94,  y: 292, tag: 'G' },
+      { id: 'Y2', x: 178, y: 294, tag: 'Y' },
+      { id: 'B2', x: 286, y: 292, tag: 'B' },
+      { id: 'G2', x: 346, y: 220, tag: 'G' },
+      { id: 'P2', x: 276, y: 374, tag: 'P' }
+    ],
+    solution: [
+      { tag: 'P', dotIds: ['P1', 'P2'] },
+      { tag: 'B', dotIds: ['B1', 'B2'] },
+      { tag: 'G', dotIds: ['G1', 'G2'] },
+      { tag: 'Y', dotIds: ['Y1', 'Y2'] }
     ]
   }
 ];
@@ -733,6 +755,7 @@ let playCount = Number(localStorage.getItem('dotgame.playCount') || '12847');
 let countedThisRound = false;
 
 const svg = document.getElementById('board');
+const boundaryEl = document.getElementById('boundary');
 const dotsG = document.getElementById('dots');
 const pathsG = document.getElementById('paths');
 const curEl = document.getElementById('cur');
@@ -743,7 +766,8 @@ const moveCounterEl = document.getElementById('moveCounter');
 const levelLabelEl = document.getElementById('levelLabel');
 const levelButtons = [
   document.getElementById('level1Btn'),
-  document.getElementById('level2Btn')
+  document.getElementById('level2Btn'),
+  document.getElementById('level3Btn')
 ];
 
 function pairCount() {
@@ -761,6 +785,9 @@ function dots() {
 
 function render() {
   const currentDots = dots();
+  boundaryEl.setAttribute('cx', BOARD.cx);
+  boundaryEl.setAttribute('cy', BOARD.cy);
+  boundaryEl.setAttribute('r', BOARD.r);
   levelLabelEl.textContent = `${level.name} · ${level.hint}`;
   levelButtons.forEach((button, index) => {
     button.classList.toggle('active', index === levelIndex);
