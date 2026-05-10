@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://gotgame-one.vercel.app/sitemap.xml
+Sitemap: https://dotgame.saleschamp100.com/sitemap.xml
