@@ -374,6 +374,7 @@
     margin-top: 42px;
     padding-top: 26px;
     border-top: 1px solid var(--hairline);
+    clear: both;
   }
 
   .ad-label {
@@ -385,12 +386,20 @@
 
   .ad-slot {
     width: min(100%, 728px);
-    min-height: 250px;
+    min-height: 100px;
     margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    position: relative;
+  }
+
+  .ad-slot .adsbygoogle {
+    display: block;
+    width: 728px;
+    max-width: 100%;
+    min-height: 90px;
   }
 
   .site-footer {
@@ -461,6 +470,23 @@
     .content-section {
       padding: 22px;
       border-radius: 18px;
+    }
+
+    .ad-area {
+      margin-top: 30px;
+      padding-top: 22px;
+    }
+
+    .ad-slot {
+      width: 320px;
+      max-width: 100%;
+      min-height: 100px;
+    }
+
+    .ad-slot .adsbygoogle {
+      width: 320px;
+      max-width: 100%;
+      min-height: 100px;
     }
   }
 </style>
@@ -596,10 +622,10 @@
         <p class="ad-label">Advertisement</p>
         <div class="ad-slot">
           <ins class="adsbygoogle"
-            style="display:block;width:100%;min-height:250px"
+            style="display:block"
             data-ad-client="ca-pub-5327283680474427"
-            data-ad-format="auto"
-            data-full-width-responsive="true"></ins>
+            data-ad-format="horizontal"
+            data-full-width-responsive="false"></ins>
         </div>
       </section>
     </section>
