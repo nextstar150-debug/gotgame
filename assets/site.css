@@ -47,6 +47,25 @@ a:hover { text-decoration: underline; }
   font-weight: 800;
 }
 
+.brand-lockup {
+  min-width: 150px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  color: var(--ink);
+}
+
+.brand-lockup:hover,
+.nav-cta:hover {
+  text-decoration: none;
+}
+
+.brand-maker {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
 .nav-links,
 .footer-links {
   display: flex;
@@ -55,6 +74,31 @@ a:hover { text-decoration: underline; }
   gap: 14px;
   font-size: 14px;
   font-weight: 650;
+}
+
+.nav-links {
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-cta {
+  min-width: 92px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border: 1px solid var(--blue);
+  border-radius: 999px;
+  color: var(--blue);
+  font-size: 14px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.nav-cta:hover {
+  background: var(--blue);
+  color: #fff;
 }
 
 .page {
@@ -188,13 +232,32 @@ ul, ol {
   margin-bottom: 10px;
 }
 
+.footer-note {
+  margin: 4px 0 0;
+}
+
 @media (max-width: 640px) {
   .nav {
     height: auto;
     padding: 14px;
-    align-items: flex-start;
+    align-items: stretch;
     flex-direction: column;
     gap: 8px;
+  }
+
+  .brand-lockup,
+  .nav-cta {
+    min-width: 0;
+  }
+
+  .nav-links {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .nav-cta {
+    width: fit-content;
   }
 
   .page { padding-top: 24px; }
